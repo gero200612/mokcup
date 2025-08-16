@@ -1,22 +1,34 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
-const routes = require('./routes/index');
 
-// Middleware
+app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use('/api', routes);
+// --- Almacenamiento temporal en memoria ---
+const gastosPorUsuario = {};
 
-// Error handling
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
+// Obtener gastos de un usuario
+app.get('/gastos', (req, res) => {
+  const mail = req.query.mail;
+  if (!mail) return res.status(400).json({ error: 'Falta el mail' });
+  const gastos = gastosPorUsuario[mail] || { gastosFijos: [], gastosVariables: [] };
+  res.json(gastos);
 });
 
-// Start the server
+// Guardar gastos de un usuario
+app.post('/gastos', (req, res) => {
+  const { mail, gastosFijos, gastosVariables } = req.body;
+  if (!mail) return res.status(400).json({ error: 'Falta el mail' });
+  gastosPorUsuario[mail] = {
+    gastosFijos: gastosFijos || [],
+    gastosVariables: gastosVariables || []
+  };
+  res.json({ ok: true });
+});
+
+// Si no tienes un app.listen, agrégalo al final:
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Servidor escuchando en puerto ${PORT}`);
 });
