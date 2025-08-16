@@ -1,0 +1,15 @@
+# File: /backend/backend/render.yaml
+
+version: 1
+services:
+  - type: web
+    name: my-node-app
+    env: node
+    buildCommand: npm install
+    startCommand: node src/app.js
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
